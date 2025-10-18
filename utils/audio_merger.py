@@ -195,8 +195,16 @@ class AudioMerger:
                     suffix_audio = AudioSegment.from_wav(suffix_path)
                 merged += silence + suffix_audio
 
-            # Export merged audio as MP3
-            merged.export(output_path, format="mp3", bitrate="192k")
+            # Normalize merged audio to prevent volume jumps
+            merged = merged.normalize()
+
+            # Export merged audio as MP3 with high quality
+            merged.export(
+                output_path,
+                format="mp3",
+                bitrate="256k",  # Higher bitrate for better quality
+                parameters=["-q:a", "0"]  # Highest quality MP3 encoding
+            )
             return True
 
         except Exception as e:

@@ -113,7 +113,20 @@ class VoiceCloner:
             # Convert to MP3 if requested
             if output_format == "mp3":
                 audio = AudioSegment.from_wav(temp_wav)
-                audio.export(final_path, format="mp3", bitrate="192k")
+
+                # Apply fade in/out to smooth edges (10ms)
+                audio = audio.fade_in(10).fade_out(10)
+
+                # Normalize audio to prevent volume jumps
+                audio = audio.normalize()
+
+                # Export with high quality settings
+                audio.export(
+                    final_path,
+                    format="mp3",
+                    bitrate="256k",  # Higher bitrate for better quality
+                    parameters=["-q:a", "0"]  # Highest quality MP3 encoding
+                )
 
                 # Remove temp WAV file
                 if os.path.exists(temp_wav):
