@@ -41,20 +41,24 @@ class VoiceCloner:
 
     def _prepare_reference_audio(self):
         """Convert reference audio to WAV format if needed"""
-        # Convert to WAV if not already
+        # Convert to WAV if not already (XTTS requires WAV internally)
+        # Store in hidden temp folder so user doesn't see it
         if not self.reference_audio_path.endswith('.wav'):
-            print(f"\n🔄 Converting audio to WAV format...")
-            wav_path = self.reference_audio_path.rsplit('.', 1)[0] + '_reference.wav'
+            print(f"\n🔄 Processing reference audio...")
+            # Create hidden temp directory
+            temp_dir = ".xtts_internal"
+            os.makedirs(temp_dir, exist_ok=True)
+            wav_path = os.path.join(temp_dir, "reference.wav")
 
             # Load audio file
             audio = AudioSegment.from_file(self.reference_audio_path)
 
-            # Export as WAV (mono, 22050 Hz is optimal for XTTS)
+            # Export as WAV (mono, 22050 Hz - required by XTTS internally)
             audio = audio.set_channels(1).set_frame_rate(22050)
             audio.export(wav_path, format="wav")
 
             self.reference_audio_path = wav_path
-            print(f"✓ Reference audio prepared: {wav_path}")
+            print(f"✓ Reference audio prepared (internal processing only)")
 
         # Check audio duration
         audio = AudioSegment.from_wav(self.reference_audio_path)
@@ -87,15 +91,18 @@ class VoiceCloner:
             print(f"🎤 Generating: {preview}")
 
         try:
-            # TTS generates WAV, so create temp WAV path
+            # TTS generates WAV, so create temp WAV path in hidden folder
             if output_format == "mp3":
-                temp_wav = output_path.replace('.mp3', '_temp.wav')
+                temp_dir = ".xtts_internal"
+                os.makedirs(temp_dir, exist_ok=True)
+                import uuid
+                temp_wav = os.path.join(temp_dir, f"temp_{uuid.uuid4().hex[:8]}.wav")
                 final_path = output_path if output_path.endswith('.mp3') else output_path.replace('.wav', '.mp3')
             else:
                 temp_wav = output_path
                 final_path = output_path
 
-            # Generate speech (TTS always outputs WAV)
+            # Generate speech (TTS always outputs WAV internally)
             self.tts.tts_to_file(
                 text=text,
                 file_path=temp_wav,
