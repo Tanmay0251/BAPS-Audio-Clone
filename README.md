@@ -2,6 +2,12 @@
 
 Voice cloning system for Pu. Prasannamuni Swami's voice to generate personalized Hindi audio messages.
 
+## 🚀 Quick Start - Open in Colab
+
+[![Open Basic Notebook](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Tanmay0251/BAPS-Audio-Clone/blob/main/basic_audio_generator.ipynb) **Basic Audio Generator** - For <100 names
+
+[![Open Optimized Notebook](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Tanmay0251/BAPS-Audio-Clone/blob/main/optimized_audio_generator.ipynb) **Optimized Audio Generator** - For 100-500+ names (60-70% faster) ⭐
+
 ## Features
 
 - ✓ Clone voice from reference audio (original.mp4)
