@@ -127,8 +127,8 @@ class VoiceCloner:
         print("🧪 Testing Voice Cloning")
         print("="*50)
 
-        output_path = "test_output.wav"
-        success = self.generate_audio(test_text, output_path)
+        output_path = "test_output.mp3"
+        success = self.generate_audio(test_text, output_path, output_format="mp3")
 
         if success:
             print(f"\n✓ Test successful! Listen to {output_path} to verify voice quality.")

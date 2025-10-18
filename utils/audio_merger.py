@@ -91,12 +91,13 @@ class AudioMerger:
         # Generate prefix audio
         if prefix:
             print(f"\n📝 Prefix: {prefix}")
-            prefix_path = os.path.join(self.temp_dir, "prefix.wav")
+            prefix_path = os.path.join(self.temp_dir, "prefix.mp3")
             success = self.voice_cloner.generate_audio(
                 text=prefix,
                 output_path=prefix_path,
                 language=language,
-                show_progress=True
+                show_progress=True,
+                output_format="mp3"
             )
             if not success:
                 print("❌ Failed to generate prefix audio")
@@ -107,12 +108,13 @@ class AudioMerger:
         # Generate suffix audio
         if suffix:
             print(f"\n📝 Suffix: {suffix}")
-            suffix_path = os.path.join(self.temp_dir, "suffix.wav")
+            suffix_path = os.path.join(self.temp_dir, "suffix.mp3")
             success = self.voice_cloner.generate_audio(
                 text=suffix,
                 output_path=suffix_path,
                 language=language,
-                show_progress=True
+                show_progress=True,
+                output_format="mp3"
             )
             if not success:
                 print("❌ Failed to generate suffix audio")
