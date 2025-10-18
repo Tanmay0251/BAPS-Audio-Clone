@@ -195,29 +195,19 @@ class AudioMerger:
                     suffix_audio = AudioSegment.from_wav(suffix_path)
                 merged += silence + suffix_audio
 
-            # Apply aggressive smoothing to reduce artifacts in merged audio
-            # 1. Longer fade in/out to smooth edges
-            merged = merged.fade_in(50).fade_out(50)
+            # Minimal processing - only essential smoothing
+            # 1. Very subtle fade in/out (20ms)
+            merged = merged.fade_in(20).fade_out(20)
 
-            # 2. Apply compression to reduce dynamic range spikes (reduces jerks)
-            merged = merged.compress_dynamic_range(
-                threshold=-20.0,  # Start compressing above -20dB
-                ratio=4.0,        # Compression ratio
-                attack=5.0        # Quick attack to catch spikes
-            )
-
-            # 3. Normalize merged audio to consistent volume
+            # 2. Gentle normalization
             merged = merged.normalize()
 
-            # 4. Apply gentle high-pass filter to remove low rumble artifacts
-            merged = merged.high_pass_filter(100)
-
-            # Export merged audio as MP3 with highest quality
+            # Export merged audio as MP3 with highest quality (no filters/compression)
             merged.export(
                 output_path,
                 format="mp3",
-                bitrate="320k",  # Maximum MP3 bitrate for best quality
-                parameters=["-q:a", "0"]  # Highest quality MP3 encoding
+                bitrate="320k",  # Maximum MP3 bitrate
+                parameters=["-q:a", "0", "-ar", "22050"]  # Highest quality, match XTTS sample rate
             )
             return True
 

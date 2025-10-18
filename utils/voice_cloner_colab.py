@@ -102,42 +102,36 @@ class VoiceCloner:
                 temp_wav = output_path
                 final_path = output_path
 
-            # Generate speech (TTS always outputs WAV internally)
+            # Generate speech with optimized XTTS parameters to reduce artifacts
             self.tts.tts_to_file(
                 text=text,
                 file_path=temp_wav,
                 speaker_wav=self.reference_audio_path,
-                language=language
+                language=language,
+                temperature=0.65,  # Lower = more stable/consistent voice (default 0.85)
+                length_penalty=1.2,  # Slightly slower/more deliberate speech
+                repetition_penalty=5.0,  # Prevent stuttering/repetition
+                top_k=50,  # Reduce randomness for smoother output
+                top_p=0.85  # Focus on most probable tokens
             )
 
             # Convert to MP3 if requested
             if output_format == "mp3":
                 audio = AudioSegment.from_wav(temp_wav)
 
-                # Apply aggressive smoothing to reduce XTTS artifacts
-                # 1. Longer fade in/out to smooth edges (50ms instead of 10ms)
-                audio = audio.fade_in(50).fade_out(50)
+                # Minimal processing - only essential smoothing
+                # 1. Very subtle fade in/out (20ms)
+                audio = audio.fade_in(20).fade_out(20)
 
-                # 2. Apply compression to reduce dynamic range spikes (reduces jerks)
-                # Compress by reducing loud parts
-                audio = audio.compress_dynamic_range(
-                    threshold=-20.0,  # Start compressing above -20dB
-                    ratio=4.0,        # Compression ratio
-                    attack=5.0        # Quick attack to catch spikes
-                )
-
-                # 3. Normalize audio to consistent volume
+                # 2. Gentle normalization
                 audio = audio.normalize()
 
-                # 4. Apply gentle high-pass filter to remove low rumble artifacts
-                audio = audio.high_pass_filter(100)
-
-                # Export with highest quality settings
+                # Export with highest quality settings (no filters/compression)
                 audio.export(
                     final_path,
                     format="mp3",
-                    bitrate="320k",  # Maximum MP3 bitrate for best quality
-                    parameters=["-q:a", "0"]  # Highest quality MP3 encoding
+                    bitrate="320k",  # Maximum MP3 bitrate
+                    parameters=["-q:a", "0", "-ar", "22050"]  # Highest quality, match XTTS sample rate
                 )
 
                 # Remove temp WAV file
