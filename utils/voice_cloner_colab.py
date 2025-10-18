@@ -68,7 +68,7 @@ class VoiceCloner:
             print("ℹ INFO: Reference audio is longer than 30 seconds.")
             print("  XTTS will use a portion of it. 10-15 seconds is optimal.")
 
-    def generate_audio(self, text, output_path, language="hi", show_progress=True):
+    def generate_audio(self, text, output_path, language="hi", show_progress=True, output_format="mp3"):
         """
         Generate audio from text using the cloned voice
 
@@ -77,6 +77,7 @@ class VoiceCloner:
             output_path: Path to save the generated audio
             language: Language code (default: "hi" for Hindi)
             show_progress: Show progress message
+            output_format: Output format - "mp3" or "wav" (default: "mp3")
 
         Returns:
             bool: True if successful, False otherwise
@@ -86,16 +87,33 @@ class VoiceCloner:
             print(f"🎤 Generating: {preview}")
 
         try:
-            # Generate speech
+            # TTS generates WAV, so create temp WAV path
+            if output_format == "mp3":
+                temp_wav = output_path.replace('.mp3', '_temp.wav')
+                final_path = output_path if output_path.endswith('.mp3') else output_path.replace('.wav', '.mp3')
+            else:
+                temp_wav = output_path
+                final_path = output_path
+
+            # Generate speech (TTS always outputs WAV)
             self.tts.tts_to_file(
                 text=text,
-                file_path=output_path,
+                file_path=temp_wav,
                 speaker_wav=self.reference_audio_path,
                 language=language
             )
 
+            # Convert to MP3 if requested
+            if output_format == "mp3":
+                audio = AudioSegment.from_wav(temp_wav)
+                audio.export(final_path, format="mp3", bitrate="192k")
+
+                # Remove temp WAV file
+                if os.path.exists(temp_wav):
+                    os.remove(temp_wav)
+
             if show_progress:
-                print(f"✓ Saved: {output_path}")
+                print(f"✓ Saved: {final_path}")
 
             return True
 

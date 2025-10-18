@@ -120,18 +120,19 @@ class BatchAudioGenerator:
                 safe_name = self.sanitize_filename(name)
                 if add_timestamp:
                     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                    output_filename = f"{safe_name}_{timestamp}.wav"
+                    output_filename = f"{safe_name}_{timestamp}.mp3"
                 else:
-                    output_filename = f"{safe_name}.wav"
+                    output_filename = f"{safe_name}.mp3"
 
                 output_path = os.path.join(self.output_dir, output_filename)
 
-                # Generate audio
+                # Generate audio as MP3
                 success = self.voice_cloner.generate_audio(
                     text=personalized_text,
                     output_path=output_path,
                     language=language,
-                    show_progress=False
+                    show_progress=False,
+                    output_format="mp3"
                 )
 
                 if success:
@@ -203,7 +204,7 @@ class BatchAudioGenerator:
 
         if output_filename is None:
             safe_name = self.sanitize_filename(name)
-            output_filename = f"{safe_name}.wav"
+            output_filename = f"{safe_name}.mp3"
 
         output_path = os.path.join(self.output_dir, output_filename)
 
@@ -211,7 +212,8 @@ class BatchAudioGenerator:
         success = self.voice_cloner.generate_audio(
             personalized_text,
             output_path,
-            show_progress=True
+            show_progress=True,
+            output_format="mp3"
         )
 
         return output_path if success else None

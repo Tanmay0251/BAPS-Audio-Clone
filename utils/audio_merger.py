@@ -135,13 +135,14 @@ class AudioMerger:
             str: Path to generated audio or None if failed
         """
         safe_name = self.sanitize_filename(name)
-        output_path = os.path.join(self.temp_dir, f"name_{safe_name}.wav")
+        output_path = os.path.join(self.temp_dir, f"name_{safe_name}.mp3")
 
         success = self.voice_cloner.generate_audio(
             text=name,
             output_path=output_path,
             language=language,
-            show_progress=False
+            show_progress=False,
+            output_format="mp3"
         )
 
         return output_path if success else None
@@ -168,23 +169,32 @@ class AudioMerger:
             # Start with empty audio
             merged = AudioSegment.empty()
 
-            # Add prefix if exists
+            # Add prefix if exists (handle both WAV and MP3)
             if prefix_path and os.path.exists(prefix_path):
-                prefix_audio = AudioSegment.from_wav(prefix_path)
+                if prefix_path.endswith('.mp3'):
+                    prefix_audio = AudioSegment.from_mp3(prefix_path)
+                else:
+                    prefix_audio = AudioSegment.from_wav(prefix_path)
                 merged += prefix_audio + silence
 
-            # Add name audio
+            # Add name audio (handle both WAV and MP3)
             if name_path and os.path.exists(name_path):
-                name_audio = AudioSegment.from_wav(name_path)
+                if name_path.endswith('.mp3'):
+                    name_audio = AudioSegment.from_mp3(name_path)
+                else:
+                    name_audio = AudioSegment.from_wav(name_path)
                 merged += name_audio
 
-            # Add suffix if exists
+            # Add suffix if exists (handle both WAV and MP3)
             if suffix_path and os.path.exists(suffix_path):
-                suffix_audio = AudioSegment.from_wav(suffix_path)
+                if suffix_path.endswith('.mp3'):
+                    suffix_audio = AudioSegment.from_mp3(suffix_path)
+                else:
+                    suffix_audio = AudioSegment.from_wav(suffix_path)
                 merged += silence + suffix_audio
 
-            # Export merged audio
-            merged.export(output_path, format="wav")
+            # Export merged audio as MP3
+            merged.export(output_path, format="mp3", bitrate="192k")
             return True
 
         except Exception as e:
@@ -250,7 +260,7 @@ class AudioMerger:
 
                 # Merge audio parts
                 safe_name = self.sanitize_filename(name)
-                output_path = os.path.join(self.output_dir, f"{safe_name}.wav")
+                output_path = os.path.join(self.output_dir, f"{safe_name}.mp3")
 
                 merge_success = self.merge_audio_parts(
                     prefix_path=prefix_path,
@@ -342,7 +352,7 @@ class AudioMerger:
 
                 # Merge audio parts
                 safe_name = self.sanitize_filename(name)
-                output_path = os.path.join(self.output_dir, f"{safe_name}.wav")
+                output_path = os.path.join(self.output_dir, f"{safe_name}.mp3")
 
                 merge_success = self.merge_audio_parts(
                     prefix_path=prefix_audio_path,
