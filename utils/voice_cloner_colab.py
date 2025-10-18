@@ -114,17 +114,29 @@ class VoiceCloner:
             if output_format == "mp3":
                 audio = AudioSegment.from_wav(temp_wav)
 
-                # Apply fade in/out to smooth edges (10ms)
-                audio = audio.fade_in(10).fade_out(10)
+                # Apply aggressive smoothing to reduce XTTS artifacts
+                # 1. Longer fade in/out to smooth edges (50ms instead of 10ms)
+                audio = audio.fade_in(50).fade_out(50)
 
-                # Normalize audio to prevent volume jumps
+                # 2. Apply compression to reduce dynamic range spikes (reduces jerks)
+                # Compress by reducing loud parts
+                audio = audio.compress_dynamic_range(
+                    threshold=-20.0,  # Start compressing above -20dB
+                    ratio=4.0,        # Compression ratio
+                    attack=5.0        # Quick attack to catch spikes
+                )
+
+                # 3. Normalize audio to consistent volume
                 audio = audio.normalize()
 
-                # Export with high quality settings
+                # 4. Apply gentle high-pass filter to remove low rumble artifacts
+                audio = audio.high_pass_filter(100)
+
+                # Export with highest quality settings
                 audio.export(
                     final_path,
                     format="mp3",
-                    bitrate="256k",  # Higher bitrate for better quality
+                    bitrate="320k",  # Maximum MP3 bitrate for best quality
                     parameters=["-q:a", "0"]  # Highest quality MP3 encoding
                 )
 
