@@ -83,7 +83,7 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-**Note:** First time running will download the XTTS model (~2GB). This is one-time only.
+**Note:** First time running will download the F5-TTS model (~1GB). This is one-time only.
 
 ### 2. Prepare Your Reference Audio
 
